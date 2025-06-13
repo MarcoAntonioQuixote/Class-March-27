@@ -7,43 +7,50 @@ function shuffle(array) {
     }
 }
 
-// Goal: Build a game of war
 
 
-// build a deck, build 52 cards (each with a value and a suit)
 
 
-class GameOfWar {
+
+
+
+
+
+class MemoryGame {
     constructor() {
         this.deck = []
         this.flipped = []
         this.player = 1;
+        // this.url = 'get your own url here' //********* */
         this.initMemoryGame()
     }
 
     initMemoryGame() {
-        let urls = [
-            'https://i.natgeofe.com/k/c022030e-f1aa-4ab3-ad56-fdcdd4a1d08b/125-animals-tiger.jpg',
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Hydrochoeris_hydrochaeris_in_Brazil_in_Petr%C3%B3polis%2C_Rio_de_Janeiro%2C_Brazil_09.jpg/960px-Hydrochoeris_hydrochaeris_in_Brazil_in_Petr%C3%B3polis%2C_Rio_de_Janeiro%2C_Brazil_09.jpg',
-            'https://wallpapers.com/images/featured/kitty-cat-pictures-nzlg8fu5sqx1m6qj.jpg',
-            'https://st2.depositphotos.com/1007517/49565/i/450/depositphotos_495653244-stock-photo-siberian-husky-puppy-outdoors.jpg',
-            'https://preview.redd.it/hvtqj0gb9yd41.jpg?width=640&crop=smart&auto=webp&s=0320afada2b7335d782bf58887aa0c54d13a6d43',
-            'https://dialogue.earth/content/uploads/2020/05/little_elephant.jpg',
-            'https://wallpaperaccess.com/full/536212.jpg',
-            'https://www.zooborns.com/.a/6a010535647bf3970b019aff3cbff5970d-800wi',
-            'https://i.pinimg.com/736x/e9/56/c3/e956c3b29a6f261b7bc8ed233aba0cf3.jpg',
-            'https://hakaimagazine.com/wp-content/uploads/header-shark-miscarriages.jpg'
 
-        ];
+        let pokemon = []
+
+        // let ids = [25,59,151,600,93,149]
+
+        fetch(this.url)
+            .then(res => res.json())
+            .then(data => {
+                this.makeDeck(data)
+            })
+    }
+
+    makeDeck(pokemon) {
         class Card {
-            constructor(url) {
-                this.url = url;
-                this.faceUp = false;
+            constructor(pokemon) {
+                this.url = pokemon.image;
+                this.name = pokemon.name;
+                this.type = pokemon.type;
+                this.id = pokemon.id;
+                this.faceUp = true;
             }
         }
 
-        for (let image of urls) {
-            this.deck.push(new Card(image),new Card(image))    
+        for (let p of pokemon) {
+            this.deck.push(new Card(p),new Card(p))    
         }
         shuffle(this.deck)
         this.drawCards();
@@ -58,16 +65,26 @@ class GameOfWar {
             
             if (card.faceUp) {
                 let image = document.createElement('img')
+                let name = document.createElement('h2')
+                let deleteBtn = document.createElement('button')
+                deleteBtn.innerText = '⛔'
+                deleteBtn.setAttribute('class','delete')
+                deleteBtn.addEventListener('click', () => {
+                    this.addFriend()
+                })
+                name.innerText = card.name
                 image.src = card.url;
                 image.setAttribute('class','cardImage')
-                container.append(image)
+                container.setAttribute('class', `card ${card.type}`)
+                container.append(image,deleteBtn)
+
             } else {
                 container.addEventListener('click', () => {
                     this.flipCard(card)
                 })
+                container.setAttribute('class','card')
             }
 
-            container.setAttribute('class','card')
             table.append(container)
         }
     }
@@ -99,15 +116,43 @@ class GameOfWar {
         }
     }
 
+    addFriend() {
+
+        let newFriend = {
+            name: "Peter",
+            image: 'https://alfabetajuega.com/hero/2025/03/spider-man-peter-parker-marvel-no-way-home-ucm.jpg?width=768&aspect_ratio=16:9&format=nowebp',
+            type: 'bug'
+        }
+
+        fetch(this.url, {
+            method: 'POST',
+            body: JSON.stringify(newFriend),
+            headers: {'content-type': 'application/json'}
+        })
+
+        this.deck.push(newFriend);
+        shuffle(this.deck)
+        this.drawCards()
+
+    }
+
+    deleteFriend(friend) {
+        
+        fetch(`${this.url}/${friend.id}`, {
+            method: 'DELETE'
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+
+        this.deck = this.deck.filter(u => u.id !== friend.id)
+        this.drawCards()
+    }
+
 }
 
-let game = new GameOfWar();
+let game = new MemoryGame();
 
 
 
-
-
-
-// restart (game)
 
 
